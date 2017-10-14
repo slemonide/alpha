@@ -1,6 +1,6 @@
 var Game = {};
 
-ALIVE_DENSITY = 0.7;
+ALIVE_DENSITY = 0.9;
 CELL_SIZE = 10;
 MIN_DELAY = 200;
 
@@ -24,6 +24,19 @@ Game.init = function () {
     Game.map = [];
 
     initializeGameField()
+};
+
+Game.isAlive = function (x, y) {
+    if (x < 0) {
+        x += Game.width;
+    }
+    if (y < 0) {
+        y += Game.height;
+    }
+
+    var i = y * Game.width + x;
+
+    return Game.map[i];
 };
 
 function initializeGameField() {
@@ -62,8 +75,47 @@ Game.render = function () {
 };
 
 Game.update = function () {
-    Game.map = [];
-    initializeGameField();
+    function nextMap() {
+        nextMap = [];
+
+        function isAlive(x, y) {
+            function numNeighbours(x, y) {
+                var count = 0;
+
+                for (var dx = -1; dx <= 1; dx++) {
+                    for (var dy = -1; dy <= 1; dy++) {
+                        if (dx !== 0 || dy !== 0) {
+                            if (Game.isAlive(x + dx, y + dy)) {
+                                count++;
+                            }
+                        }
+                    }
+                }
+
+                return count;
+            }
+
+            return (numNeighbours(x,y) === 3) ||
+                Game.isAlive(x,y) &&
+                (numNeighbours(x,y) >= 2) &&
+                (numNeighbours(x,y) <= 3);
+        }
+
+        for (var i = 0; i < Game.map.length; i++) {
+            var x = i % Game.width;
+            var y = (i - x) / Game.width;
+
+            if (isAlive(x, y)) {
+                nextMap[i] = 1;
+            } else {
+                nextMap[i] = 0;
+            }
+        }
+
+        return nextMap;
+    }
+
+    Game.map = nextMap();
 };
 
 function main() {
