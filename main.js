@@ -2,11 +2,14 @@ var Game = {};
 
 ALIVE_DENSITY = 0.7;
 CELL_SIZE = 10;
+MIN_DELAY = 200;
 
 Game.init = function () {
     Game.fps = 50;
     Game.canvas = document.getElementById('main');
     Game.ctx = Game.canvas.getContext('2d');
+
+    Game.lastTime = (new Date()).getTime();
 
     Game.height = 100;
     Game.width = 100;
@@ -34,8 +37,12 @@ function initializeGameField() {
 }
 
 Game.run = function () {
-    Game.update();
-    Game.render();
+    if ((new Date()).getTime() - Game.lastTime > MIN_DELAY) {
+        Game.lastTime = (new Date()).getTime();
+
+        Game.update();
+        Game.render();
+    }
 };
 
 Game.render = function () {
